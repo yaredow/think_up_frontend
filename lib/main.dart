@@ -1,32 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:think_up_frontend/views/widget_tree.dart';
+import 'package:think_up_frontend/views/widgets/navbar_widget.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "My First App",
-      theme: ThemeData(primarySwatch: Colors.indigo),
-      home: HomePage(),
-    );
-  }
+  State<MyApp> createState() => _MyAppState();
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Weclome"),
-      ),
-      body: const Center(child: Text("This is my new app", style: TextStyle(fontSize: 18),),),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal, brightness: Brightness.dark)),
+      home: WidgetTree(),
     );
-  }
+ }
 }
+
