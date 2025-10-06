@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:think_up_frontend/views/widget_tree.dart';
-import 'package:think_up_frontend/views/widgets/navbar_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,9 +17,13 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal, brightness: Brightness.dark)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          brightness: Brightness.dark,
+        ),
+      ),
       home: WidgetTree(),
     );
- }
+  }
 }
-
