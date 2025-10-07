@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:think_up_frontend/views/data/notifiers.dart';
-import 'package:think_up_frontend/views/widget_tree.dart';
+import 'package:think_up_frontend/views/pages/welcome_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
               brightness: isDarkMode ? Brightness.dark : Brightness.light,
             ),
           ),
-          home: WidgetTree(),
+          home: WelcomePage(),
         );
       },
     );
