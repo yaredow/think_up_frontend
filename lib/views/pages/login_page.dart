@@ -17,23 +17,6 @@ class _LoginPageState extends State<LoginPage> {
   bool isFormvalid = false;
 
   @override
-  void initState() {
-    controllerEmail.addListener(_validateForm);
-    controllerPassword.addListener(_validateForm);
-
-    super.initState();
-  }
-
-  void _validateForm() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    if (isValid != isFormvalid) {
-      setState(() {
-        isFormvalid = isValid;
-      });
-    }
-  }
-
-  @override
   void dispose() {
     controllerEmail.dispose();
     controllerPassword.dispose();
@@ -69,7 +52,6 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Column(
             children: [
               HeroWidget(title: "Login"),
@@ -77,6 +59,7 @@ class _LoginPageState extends State<LoginPage> {
               TextFormField(
                 controller: controllerEmail,
                 validator: _validateEmail,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: InputDecoration(
                   labelText: "Email",
                   hintText: "Enter your email",
@@ -90,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
               TextFormField(
                 controller: controllerPassword,
                 validator: _validatePassword,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 obscureText: true,
                 keyboardType: TextInputType.visiblePassword,
                 decoration: InputDecoration(
