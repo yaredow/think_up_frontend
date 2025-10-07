@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:think_up_frontend/views/pages/login_page.dart';
+import 'package:think_up_frontend/views/pages/onbording_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -33,7 +34,7 @@ class WelcomePage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return LoginPage(title: "Login");
+                          return OnbordingPage();
                         },
                       ),
                     );
