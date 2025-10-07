@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:think_up_frontend/views/data/constants.dart';
 import 'package:think_up_frontend/views/data/notifiers.dart';
 import 'package:think_up_frontend/views/pages/welcome_page.dart';
 
@@ -14,6 +16,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    initThemeData();
+    super.initState();
+  }
+
+  void initThemeData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool? repeat = prefs.getBool(KConstants.themeModeKey);
+    isDarkModeNotifier.value = repeat ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(

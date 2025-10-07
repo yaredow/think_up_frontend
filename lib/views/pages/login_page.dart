@@ -3,7 +3,9 @@ import 'package:think_up_frontend/views/widget_tree.dart';
 import 'package:think_up_frontend/views/widgets/hero_widget.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({super.key, required this.title});
+
+  final String title;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -84,62 +86,67 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            children: [
-              HeroWidget(title: "Login"),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: controllerEmail,
-                validator: _validateEmail,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  hintText: "Enter your email",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Column(
+                children: [
+                  HeroWidget(title: widget.title),
+                  SizedBox(height: 20),
+                  TextFormField(
+                    controller: controllerEmail,
+                    validator: _validateEmail,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      hintText: "Enter your email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      prefixIcon: Icon(Icons.email),
+                    ),
                   ),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              SizedBox(height: 15.0),
-              TextFormField(
-                controller: controllerPassword,
-                validator: _validatePassword,
-                obscureText: true,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  hintText: "Enter your password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+                  SizedBox(height: 15.0),
+                  TextFormField(
+                    controller: controllerPassword,
+                    validator: _validatePassword,
+                    obscureText: true,
+                    keyboardType: TextInputType.visiblePassword,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      hintText: "Enter your password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
                   ),
-                  prefixIcon: Icon(Icons.lock),
-                ),
+                  SizedBox(height: 15.0),
+                  FilledButton(
+                    onPressed: isFormvalid
+                        ? () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return WidgetTree();
+                                },
+                              ),
+                              (route) => false,
+                            );
+                          }
+                        : null,
+                    style: FilledButton.styleFrom(
+                      minimumSize: Size(double.infinity, 40.0),
+                    ),
+                    child: Text("Get Started"),
+                  ),
+                ],
               ),
-              SizedBox(height: 15.0),
-              FilledButton(
-                onPressed: isFormvalid
-                    ? () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return WidgetTree();
-                            },
-                          ),
-                        );
-                      }
-                    : null,
-                style: FilledButton.styleFrom(
-                  minimumSize: Size(double.infinity, 40.0),
-                ),
-                child: Text("Get Started"),
-              ),
-            ],
+            ),
           ),
         ),
       ),
