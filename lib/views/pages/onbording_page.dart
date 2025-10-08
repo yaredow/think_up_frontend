@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:think_up_frontend/views/data/constants.dart';
-import 'package:think_up_frontend/views/pages/home_page.dart';
-import 'package:think_up_frontend/views/pages/login_page.dart';
+import 'package:think_up_frontend/views/widget_tree.dart';
 
 class OnbordingPage extends StatefulWidget {
   const OnbordingPage({super.key});
@@ -13,22 +11,6 @@ class OnbordingPage extends StatefulWidget {
 }
 
 class _OnbordingPageState extends State<OnbordingPage> {
-  Future<void> _completeOnboarding() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_complete', true);
-
-    if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return LoginPage(title: "Login");
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,13 +32,14 @@ class _OnbordingPageState extends State<OnbordingPage> {
                 SizedBox(height: 15.0),
                 FilledButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) {
-                          return HomePage();
+                          return WidgetTree();
                         },
                       ),
+                      (route) => false,
                     );
                   },
                   style: FilledButton.styleFrom(
