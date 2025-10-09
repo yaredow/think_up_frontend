@@ -1,4 +1,4 @@
-# think_up_frontend
+# think
 
 A new Flutter project.
 

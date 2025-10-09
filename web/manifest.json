@@ -1,6 +1,6 @@
 {
-    "name": "think_up_frontend",
-    "short_name": "think_up_frontend",
+    "name": "think",
+    "short_name": "think",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
