@@ -6,8 +6,7 @@ class GetAlarmById {
 
   GetAlarmById(this.repository);
 
-  /// Execute the use case
-  Future<Alarm?> call(String id) async {
-    return await repository.getAlarmById(id);
+  Future<Alarm> call(String alarmId) async {
+    return await repository.getAlarmById(alarmId);
   }
 }

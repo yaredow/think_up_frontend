@@ -1,9 +1,18 @@
 import 'package:think_up/features/schedule/domain/entities/alarm.dart';
 
 abstract class AlarmRepository {
+  // get alarms
   Future<List<Alarm>> getAlarms();
-  Future<Alarm?> getAlarmById(String id);
+
+  // get alarm by id
+  Future<Alarm> getAlarmById(String alarmId);
+
+  // add alarm
   Future<void> addAlarm(Alarm alarm);
+
+  // update alarm
   Future<void> updateAlarm(Alarm alarm);
-  Future<void> deleteAlarm(String id);
+
+  // delete alarm
+  Future<void> deleteAlarm(String alarmId);
 }

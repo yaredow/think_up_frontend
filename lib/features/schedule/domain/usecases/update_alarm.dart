@@ -1,12 +1,12 @@
 import 'package:think_up/features/schedule/domain/entities/alarm.dart';
 import 'package:think_up/features/schedule/domain/repositories/alarm_repository.dart';
 
-class AddAlarm {
+class UpdateAlarm {
   final AlarmRepository repository;
 
-  AddAlarm(this.repository);
+  UpdateAlarm(this.repository);
 
   Future<void> call(Alarm alarm) async {
-    await repository.addAlarm(alarm);
+    return await repository.updateAlarm(alarm);
   }
 }

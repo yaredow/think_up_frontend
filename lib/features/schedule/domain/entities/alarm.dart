@@ -9,7 +9,7 @@ class Alarm {
     required this.id,
     required this.title,
     required this.time,
-    required this.isActive,
+    this.isActive = true,
     this.duration,
   });
 
