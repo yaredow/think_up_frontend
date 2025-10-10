@@ -5,7 +5,7 @@ abstract class AlarmRepository {
   Future<List<Alarm>> getAlarms();
 
   // get alarm by id
-  Future<Alarm> getAlarmById(String alarmId);
+  Future<Alarm?> getAlarmById(String alarmId);
 
   // add alarm
   Future<void> addAlarm(Alarm alarm);
