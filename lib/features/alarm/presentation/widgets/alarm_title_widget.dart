@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:think_up/features/schedule/domain/entities/alarm.dart';
-import 'package:think_up/features/schedule/presentation/provider/alarm_provider.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
+import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 
 class AlarmTile extends StatelessWidget {
   final Alarm alarm;

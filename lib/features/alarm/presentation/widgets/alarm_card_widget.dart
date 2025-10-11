@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:think_up/features/schedule/domain/entities/alarm.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 
 class AlarmCardWidget extends StatelessWidget {
   final Alarm alarm;
@@ -21,28 +21,25 @@ class AlarmCardWidget extends StatelessWidget {
     final Color accentColor = Colors.green;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0),
-          side: BorderSide(
-            color: accentColor.withValues(alpha: 0.5),
-            width: 2.0,
-          ),
+          side: BorderSide(width: 1.5, color: accentColor),
         ),
-        elevation: 0,
         child: Padding(
-          padding: const EdgeInsets.all(18.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Row(
                     children: [
                       Icon(Icons.circle, size: 8, color: accentColor),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.0),
                       Text(
                         recurrence,
                         style: TextStyle(
@@ -55,19 +52,17 @@ class AlarmCardWidget extends StatelessWidget {
                   ),
                   Switch(
                     value: true,
-                    onChanged: onToggle,
                     activeThumbColor: Colors.white,
                     activeTrackColor: accentColor,
-                    inactiveThumbColor: Colors.grey,
+                    onChanged: onToggle,
                   ),
                 ],
               ),
-
               const SizedBox(height: 8),
 
               Text(
                 alarmTime.format(context),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
@@ -75,25 +70,21 @@ class AlarmCardWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 8),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    alarm.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black54,
-                    ),
+                    recurrence,
+                    style: TextStyle(color: Colors.black87, fontSize: 16),
                   ),
                   IconButton(
+                    onPressed: onDelete,
                     icon: Icon(
                       Icons.delete_outline,
                       color: Colors.grey[600],
                       size: 24,
                     ),
-                    onPressed: onDelete,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),

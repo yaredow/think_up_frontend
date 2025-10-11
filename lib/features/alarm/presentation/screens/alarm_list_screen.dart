@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:think_up/app/router.dart';
 import 'package:think_up/core/permissions/permission_service.dart';
-import 'package:think_up/features/schedule/domain/entities/alarm.dart';
-import 'package:think_up/features/schedule/presentation/provider/alarm_provider.dart';
-import 'package:think_up/features/schedule/presentation/widgets/alarm_card_widget.dart';
-import 'package:think_up/features/schedule/presentation/widgets/alarm_form_sheet_widget.dart';
-import 'package:think_up/features/schedule/presentation/widgets/alarm_title_widget.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
+import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
+import 'package:think_up/features/alarm/presentation/widgets/alarm_card_widget.dart';
+import 'package:think_up/features/alarm/presentation/widgets/alarm_form_sheet_widget.dart';
 
-class ScheduleScreen extends StatefulWidget {
-  const ScheduleScreen({super.key});
+class AlarmListScreen extends StatefulWidget {
+  const AlarmListScreen({super.key});
 
   @override
-  State<ScheduleScreen> createState() => _ScheduleScreenState();
+  State<AlarmListScreen> createState() => _ScheduleScreenState();
 }
 
-class _ScheduleScreenState extends State<ScheduleScreen>
+class _ScheduleScreenState extends State<AlarmListScreen>
     with WidgetsBindingObserver {
   @override
   void initState() {
@@ -55,7 +55,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     );
   }
 
-  Future<void> onFabPressed() async {
+  Future<void> onAddAlarmPressed() async {
     final permissionService = context.read<PermissionService>();
 
     final notifGranted =
@@ -89,41 +89,8 @@ class _ScheduleScreenState extends State<ScheduleScreen>
       }
       // If request opens settings, user must come back to app; we re-check on resume.
     }
-
-    if (!mounted) return;
-
-    final TimeOfDay? selectedTime = await showModalBottomSheet<TimeOfDay>(
-      context: context,
-      builder: (context) {
-        return const AlarmFormSheetWidget();
-      },
-    );
-
-    if (!mounted) return;
-
-    if (selectedTime != null) {
-      final alarmProvider = context.read<AlarmProvider>();
-
-      final newAlarm = _createNewAlarm(alarmProvider, selectedTime);
-      alarmProvider.addAlarm(newAlarm);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Alarm "${newAlarm.title}" scheduled'),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 4),
-            action: SnackBarAction(
-              label: "View",
-              onPressed: () {
-                //TODO impliment navigation to an alarm detail screen
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-          ),
-        );
-      }
-    }
+  
+  AppRouter.
   }
 
   Future<bool?> _showOpenSettingsDialog() {
@@ -170,10 +137,66 @@ class _ScheduleScreenState extends State<ScheduleScreen>
     return Alarm(id: nextId, title: "Alarm $nextId", time: scheduleTime);
   }
 
+  Future<bool> _showDeleteConfirmationDialog() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Alarm?"),
+        content: const Text(
+          "Are you sure you want to permanently delete this alarm?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text("Cancel"),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: Text("Delete"),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
+  Future<void> onAlarmDelete(String alarmId) async {
+    final confirmed = await _showDeleteConfirmationDialog();
+
+    if (!mounted || !confirmed) return;
+
+    final alarmProvider = context.read<AlarmProvider>();
+
+    alarmProvider.deleteAlarm(alarmId);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Alarm Deleted"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 4),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Alarms")),
+      appBar: AppBar(
+        title: const Text("Alarms"),
+        actions: [
+          IconButton(icon: const Icon(Icons.add), onPressed: () {}),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: Consumer<AlarmProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
@@ -190,9 +213,7 @@ class _ScheduleScreenState extends State<ScheduleScreen>
               final alarm = provider.alarms[index];
               return AlarmCardWidget(
                 alarm: alarm,
-                onDelete: () {
-                  print("Delete alarm");
-                },
+                onDelete: () => onAlarmDelete(alarm.id.toString()),
                 onToggle: (value) {
                   print("Toggle alarm");
                 },

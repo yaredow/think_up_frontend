@@ -1,12 +1,12 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
-import 'package:think_up/features/schedule/domain/entities/alarm.dart';
-import 'package:think_up/features/schedule/domain/usecases/add_alarm.dart';
-import 'package:think_up/features/schedule/domain/usecases/delete_alarm.dart';
-import 'package:think_up/features/schedule/domain/usecases/get_alarm_by_id.dart';
-import 'package:think_up/features/schedule/domain/usecases/get_alarms.dart';
-import 'package:think_up/features/schedule/domain/usecases/update_alarm.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
+import 'package:think_up/features/alarm/domain/usecases/add_alarm.dart';
+import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
+import 'package:think_up/features/alarm/domain/usecases/get_alarm_by_id.dart';
+import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
+import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 
 class AlarmProvider extends ChangeNotifier {
   final GetAlarms getAlarmsUseCase;

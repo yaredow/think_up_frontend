@@ -1,4 +1,4 @@
-import 'package:think_up/features/schedule/domain/entities/alarm.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 
 abstract class AlarmRepository {
   // get alarms
