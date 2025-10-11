@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:think_up/core/permissions/permission_service.dart';
 import 'package:think_up/features/schedule/domain/entities/alarm.dart';
 import 'package:think_up/features/schedule/presentation/provider/alarm_provider.dart';
+import 'package:think_up/features/schedule/presentation/widgets/alarm_card_widget.dart';
 import 'package:think_up/features/schedule/presentation/widgets/alarm_form_sheet_widget.dart';
 import 'package:think_up/features/schedule/presentation/widgets/alarm_title_widget.dart';
 
@@ -93,7 +94,6 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 
     final TimeOfDay? selectedTime = await showModalBottomSheet<TimeOfDay>(
       context: context,
-      isScrollControlled: true,
       builder: (context) {
         return const AlarmFormSheetWidget();
       },
@@ -109,7 +109,18 @@ class _ScheduleScreenState extends State<ScheduleScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Alarm "${newAlarm.title}" scheduled')),
+          SnackBar(
+            content: Text('Alarm "${newAlarm.title}" scheduled'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+            action: SnackBarAction(
+              label: "View",
+              onPressed: () {
+                //TODO impliment navigation to an alarm detail screen
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
         );
       }
     }
@@ -177,7 +188,15 @@ class _ScheduleScreenState extends State<ScheduleScreen>
             itemCount: provider.alarms.length,
             itemBuilder: (context, index) {
               final alarm = provider.alarms[index];
-              return AlarmTile(alarm: alarm);
+              return AlarmCardWidget(
+                alarm: alarm,
+                onDelete: () {
+                  print("Delete alarm");
+                },
+                onToggle: (value) {
+                  print("Toggle alarm");
+                },
+              );
             },
           );
         },
