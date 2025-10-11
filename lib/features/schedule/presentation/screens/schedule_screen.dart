@@ -32,7 +32,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           }
 
           if (provider.alarms.isEmpty) {
-            return const Center(child: Text("No alarms set"));
+            return const Center(child: Text("No Alarm set"));
           }
 
           return ListView.builder(
@@ -46,7 +46,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final alarmProvider = Provider.of(context, listen: false);
+          final alarmProvider = Provider.of<AlarmProvider>(
+            context,
+            listen: false,
+          );
 
           final newAlarm = alarmProvider.alarms.isEmpty
               ? Alarm(

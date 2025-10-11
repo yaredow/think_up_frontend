@@ -11,7 +11,7 @@ abstract class AlarmRepository {
   Future<void> addAlarm(Alarm alarm);
 
   // update alarm
-  Future<void> updateAlarm(Alarm alarm);
+  Future<Alarm> updateAlarm(Alarm alarm);
 
   // delete alarm
   Future<void> deleteAlarm(String alarmId);

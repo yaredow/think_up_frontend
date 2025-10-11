@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:think_up/features/schedule/domain/entities/alarm.dart';
 import 'package:think_up/features/schedule/domain/usecases/add_alarm.dart';
@@ -23,7 +25,7 @@ class AlarmProvider extends ChangeNotifier {
 
   // state
   List<Alarm> _alarms = [];
-  List<Alarm> get alarms => _alarms;
+  UnmodifiableListView<Alarm> get alarms => UnmodifiableListView(_alarms);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -56,5 +58,21 @@ class AlarmProvider extends ChangeNotifier {
   // Get alarm by ID
   Future<Alarm?> getAlarmById(String id) async {
     return await getAlarmByIdUseCase(id);
+  }
+
+  Future<Alarm> updateAlarm(Alarm alarm) async {
+    final result = await updateAlarmUseCase(alarm);
+    final updated = result is Alarm ? result : alarm;
+    final idx = _alarms.indexWhere(
+      (a) => a.id.toString() == updated.id.toString(),
+    );
+
+    if (idx >= 0) {
+      _alarms[idx] = updated;
+    } else {
+      _alarms.add(updated);
+    }
+    notifyListeners();
+    return updated;
   }
 }

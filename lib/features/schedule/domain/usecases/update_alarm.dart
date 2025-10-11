@@ -6,7 +6,7 @@ class UpdateAlarm {
 
   UpdateAlarm(this.repository);
 
-  Future<void> call(Alarm alarm) async {
+  Future<Alarm> call(Alarm alarm) async {
     return await repository.updateAlarm(alarm);
   }
 }

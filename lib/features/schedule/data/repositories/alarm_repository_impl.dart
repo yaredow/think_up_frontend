@@ -25,10 +25,13 @@ class AlarmRepositoryImpl implements AlarmRepository {
   }
 
   @override
-  Future<void> updateAlarm(Alarm alarm) async {
+  Future<Alarm> updateAlarm(Alarm alarm) async {
     final index = _alarms.indexWhere((a) => a.id == alarm.id);
     if (index != -1) {
       _alarms[index] = alarm;
+    } else {
+      _alarms.add(alarm);
     }
+    return alarm;
   }
 }
