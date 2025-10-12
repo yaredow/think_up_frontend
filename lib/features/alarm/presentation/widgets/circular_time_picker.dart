@@ -185,25 +185,74 @@ class _CircularTimePainter extends CustomPainter {
     canvas.drawArc(rect, startAngle, sweepAngle, false, activePaint);
 
     // calculate the coordinate of the handle center point
+
     final handleX = center.dx + trackRadius * cos(startAngle + sweepAngle);
     final handleY = center.dy + trackRadius * sin(startAngle + sweepAngle);
 
-    final handleFillPaint = Paint()
-      ..color = activeColor
+    // --- DRAWING THE CUSTOM HANDLE ---
+
+    // 1. Draw the Outer White Circle (Handle Background)
+    final handleOuterPaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    canvas.drawCircle(
-      Offset(handleX, handleY),
-      trackWidth / 2,
-      handleFillPaint,
+    const handleRadius = trackWidth / 2;
+    canvas.drawCircle(Offset(handleX, handleY), handleRadius, handleOuterPaint);
+
+    // 2. Setup Icon Painting (TextPainter)
+
+    // Define the icon style
+    final iconTextSpan = TextSpan(
+      // 🛑 Using the corrected icon: arrow_forward_ios 🛑
+      text: String.fromCharCode(Icons.arrow_forward_ios_rounded.codePoint),
+      style: TextStyle(
+        color: activeColor, // Green color
+        fontSize: 14.0,
+        fontFamily: Icons.arrow_forward_ios_rounded.fontFamily,
+        package: Icons.arrow_forward_ios_rounded.fontPackage,
+      ),
     );
+
+    final iconPainter = TextPainter(
+      text: iconTextSpan,
+      textDirection: TextDirection.ltr,
+    );
+
+    iconPainter.layout();
+
+    // --- ROTATION LOGIC ---
+    // The rotation angle is the sweepAngle itself
+    final rotationAngle = sweepAngle;
+
+    canvas.save(); // Save the current canvas state
+
+    // Move the canvas origin to the center of the handle
+    canvas.translate(handleX, handleY);
+
+    // Apply the rotation (clockwise by the angle of the arc)
+    canvas.rotate(rotationAngle);
+
+    // Calculate the offset to center the icon AFTER the rotation and translation.
+    // The center point is now (0, 0) relative to the translated canvas.
+    final iconOffset = Offset(-iconPainter.width / 2, -iconPainter.height / 2);
+
+    // Paint the icon onto the translated and rotated canvas
+    iconPainter.paint(canvas, iconOffset);
+
+    canvas.restore();
   }
 
   void _drawClockNumber(Canvas canvas, Offset center, double trackRadius) {
-    const textStyle = TextStyle(
+    const defaultTextStyle = TextStyle(
       color: Colors.grey,
       fontSize: 17,
       fontWeight: FontWeight.w400,
+    );
+
+    final activeTextStyle = TextStyle(
+      color: activeColor,
+      fontSize: 19,
+      fontWeight: FontWeight.w600,
     );
 
     final textRadius = trackRadius * 0.75;
@@ -213,6 +262,9 @@ class _CircularTimePainter extends CustomPainter {
 
       final x = center.dx + textRadius * cos(angle);
       final y = center.dy + textRadius * sin(angle);
+
+      final isKeyHour = (i % 3 == 0) || (i == 12);
+      final textStyle = isKeyHour ? activeTextStyle : defaultTextStyle;
 
       final textSpan = TextSpan(text: i.toString(), style: textStyle);
       final textPainter = TextPainter(
@@ -275,7 +327,7 @@ class _CircularTimePainter extends CustomPainter {
 
     // Repaint if the time, angle, or colors have changed
     return oldPainter.selectedTime != selectedTime ||
-        oldPainter.currentMinuteAnge != currentMinuteAnge || // Crucial check
+        oldPainter.currentMinuteAnge != currentMinuteAnge ||
         oldPainter.trackColor != trackColor ||
         oldPainter.activeColor != activeColor;
   }
