@@ -11,7 +11,7 @@ class ThinkUp extends StatelessWidget {
       title: "ThinkUp",
       theme: AppTheme.lightTheme(),
       onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: "/schedule",
+      initialRoute: "/alarm",
       debugShowCheckedModeBanner: false,
     );
   }

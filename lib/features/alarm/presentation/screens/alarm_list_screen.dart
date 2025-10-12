@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:think_up/app/router.dart';
 import 'package:think_up/core/permissions/permission_service.dart';
 import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 import 'package:think_up/features/alarm/presentation/widgets/alarm_card_widget.dart';
-import 'package:think_up/features/alarm/presentation/widgets/alarm_form_sheet_widget.dart';
 
 class AlarmListScreen extends StatefulWidget {
   const AlarmListScreen({super.key});
@@ -57,7 +55,6 @@ class _ScheduleScreenState extends State<AlarmListScreen>
 
   Future<void> onAddAlarmPressed() async {
     final permissionService = context.read<PermissionService>();
-
     final notifGranted =
         await permissionService.isNotificationGranted() ||
         await permissionService.requestNotificationPermission();
@@ -78,19 +75,9 @@ class _ScheduleScreenState extends State<AlarmListScreen>
       return;
     }
 
-    final canExact = await permissionService.canScheduleExactAlarm();
-    if (!canExact) {
-      final requested = await permissionService.requestScheduleExactAlarm();
-      if (!requested && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Exact alarm permission not granted')),
-        );
-        return;
-      }
-      // If request opens settings, user must come back to app; we re-check on resume.
+    if (mounted) {
+      await Navigator.of(context).pushNamed("/create-alarm");
     }
-  
-  AppRouter.
   }
 
   Future<bool?> _showOpenSettingsDialog() {
@@ -113,28 +100,6 @@ class _ScheduleScreenState extends State<AlarmListScreen>
         ],
       ),
     );
-  }
-
-  Alarm _createNewAlarm(AlarmProvider alarmProvider, TimeOfDay selectedTime) {
-    final nextId = alarmProvider.alarms.isEmpty
-        ? 1
-        : alarmProvider.alarms.last.id + 1;
-
-    final now = DateTime.now();
-
-    DateTime scheduleTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      selectedTime.hour,
-      selectedTime.minute,
-    );
-
-    if (scheduleTime.isBefore(now)) {
-      scheduleTime = scheduleTime.add(const Duration(days: 1));
-    }
-
-    return Alarm(id: nextId, title: "Alarm $nextId", time: scheduleTime);
   }
 
   Future<bool> _showDeleteConfirmationDialog() async {
@@ -192,9 +157,9 @@ class _ScheduleScreenState extends State<AlarmListScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text("Alarms"),
+        automaticallyImplyLeading: false,
         actions: [
-          IconButton(icon: const Icon(Icons.add), onPressed: () {}),
-          const SizedBox(width: 8),
+          IconButton(icon: const Icon(Icons.add), onPressed: onAddAlarmPressed),
         ],
       ),
       body: Consumer<AlarmProvider>(
@@ -221,10 +186,6 @@ class _ScheduleScreenState extends State<AlarmListScreen>
             },
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: onFabPressed,
-        child: const Icon(Icons.add),
       ),
     );
   }
