@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,23 @@ class CircularTimePicker extends StatefulWidget {
 }
 
 class _CircularTimePickerState extends State<CircularTimePicker> {
-  DateTime _selectedTime = DateTime(2025, 10, 12, 10, 30);
+  DateTime _selectedTime = DateTime.now();
+
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   double _calculateFullTimeAngle(DateTime time) {
     final hour12 = time.hour % 12;
@@ -18,6 +35,33 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     return (totalMinutes / 720) * 2 * pi;
   }
 
+  String _formatTime(DateTime time) {
+    final hour12 = time.hour % 12 == 0 ? 12 : time.hour % 12;
+
+    final formattedHour = hour12.toString().padLeft(2, '0');
+
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+
+    return '$formattedHour:$minute $period';
+  }
+
+  void toggleAlarm(String period) {
+    final isCurrentPm = _selectedTime.hour >= 12;
+    bool shouldBePm = (period == "PM");
+
+    if (isCurrentPm != shouldBePm) {
+      int newHour = _selectedTime.hour + (shouldBePm ? 12 : -12);
+
+      newHour = newHour % 24;
+
+      setState(() {
+        _selectedTime = _selectedTime.copyWith(hour: newHour);
+      });
+    }
+  }
+
+  // Determine current AM/PM status for styling the toggle
   void _updateTimeFromDrag(Offset localPosition, double size) {
     final center = Offset(size / 2, size / 2);
     final dx = localPosition.dx - center.dx;
@@ -67,9 +111,41 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     });
   }
 
+  String _getTimeRemainingText(DateTime time) {
+    final now = DateTime.now();
+
+    DateTime todayAalarmTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      _selectedTime.hour,
+      _selectedTime.minute,
+    );
+
+    Duration timeUntilAlarm;
+
+    if (todayAalarmTime.isAfter(now)) {
+      timeUntilAlarm = todayAalarmTime.difference(now);
+    } else {
+      final tomorrowAlarmTime = todayAalarmTime.add(const Duration(days: 1));
+      timeUntilAlarm = tomorrowAlarmTime.difference(now);
+    }
+
+    final totalMinutes = timeUntilAlarm.inMinutes;
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    String hoursText = hours == 1 ? '1 hour' : '$hours hours';
+    String minutesText = minutes == 1 ? '1 minute' : '$minutes minutes';
+
+    return 'Alarm in $hoursText $minutesText';
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size.width * 0.6;
+    final isPm = _selectedTime.hour >= 12;
+    final activeColor = Colors.green.shade400;
 
     final minuteAngle = _calculateFullTimeAngle(_selectedTime);
 
@@ -106,7 +182,7 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
           Column(
             children: [
               Text(
-                "07:30 AM",
+                _formatTime(_selectedTime),
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -114,8 +190,59 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
                 ),
               ),
               const SizedBox(height: 10.0),
+              Container(
+                height: 35,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onTap: () => toggleAlarm('AM'),
+                      child: Container(
+                        width: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: !isPm ? activeColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'AM',
+                          style: TextStyle(
+                            color: !isPm ? Colors.white : Colors.black54,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // PM Button
+                    GestureDetector(
+                      onTap: () => toggleAlarm("PM"),
+                      child: Container(
+                        width: 60,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isPm ? activeColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'PM',
+                          style: TextStyle(
+                            color: isPm ? Colors.white : Colors.black54,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+
               Text(
-                "Alarm in 20 hours 54 minutes",
+                _getTimeRemainingText(_selectedTime),
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ],
@@ -203,7 +330,6 @@ class _CircularTimePainter extends CustomPainter {
 
     // Define the icon style
     final iconTextSpan = TextSpan(
-      // 🛑 Using the corrected icon: arrow_forward_ios 🛑
       text: String.fromCharCode(Icons.arrow_forward_ios_rounded.codePoint),
       style: TextStyle(
         color: activeColor, // Green color
