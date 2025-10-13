@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<DaySelectorWidget> {
 
   void _toggleDays(BuildContext context, day) {
     final provider = Provider.of<AlarmProvider>(context, listen: false);
-    final Set<String> updatedDays = Set.from(provider.draftAlarm.days);
+    final List<String> updatedDays = List.from(provider.draftAlarm.days);
 
     if (updatedDays.contains(day)) {
       updatedDays.remove(day);

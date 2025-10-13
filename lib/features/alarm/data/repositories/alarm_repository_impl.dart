@@ -1,37 +1,24 @@
+import 'package:think_up/features/alarm/data/datasources/alarm_local_data_source.dart';
 import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 import 'package:think_up/features/alarm/domain/repositories/alarm_repository.dart';
 
 class AlarmRepositoryImpl implements AlarmRepository {
-  final List<Alarm> _alarms = [];
+  final AlarmLocalDataSource localDataSource;
+
+  AlarmRepositoryImpl({required this.localDataSource});
 
   @override
   Future<void> addAlarm(Alarm alarm) async {
-    _alarms.add(alarm);
-  }
-
-  @override
-  Future<void> deleteAlarm(String id) async {
-    _alarms.removeWhere((alarm) => alarm.id.toString() == id);
-  }
-
-  @override
-  Future<Alarm?> getAlarmById(String alarmId) async {
-    return _alarms.firstWhere((alarm) => alarm.id.toString() == alarmId);
+    await localDataSource.saveAlarm(alarm);
   }
 
   @override
   Future<List<Alarm>> getAlarms() async {
-    return List<Alarm>.from(_alarms);
+    return await localDataSource.getAlarms();
   }
 
   @override
-  Future<Alarm> updateAlarm(Alarm alarm) async {
-    final index = _alarms.indexWhere((a) => a.id == alarm.id);
-    if (index != -1) {
-      _alarms[index] = alarm;
-    } else {
-      _alarms.add(alarm);
-    }
-    return alarm;
+  Future<void> deleteAlarm(String id) async {
+    await localDataSource.deleteAlarm(id);
   }
 }

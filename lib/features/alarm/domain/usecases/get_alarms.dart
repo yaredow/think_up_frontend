@@ -7,6 +7,6 @@ class GetAlarms {
   GetAlarms(this.repository);
 
   Future<List<Alarm>> call() async {
-    return await repository.getAlarms();
+    return repository.getAlarms();
   }
 }

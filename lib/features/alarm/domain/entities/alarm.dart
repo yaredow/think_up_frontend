@@ -1,9 +1,9 @@
 class Alarm {
-  final int id;
+  final String id;
   final String title;
   final DateTime time;
   final bool isActive;
-  final Set<String> days;
+  final List<String> days;
   final String sound;
   final bool isRepeating;
 
@@ -18,11 +18,11 @@ class Alarm {
   });
 
   Alarm copyWith({
-    int? id,
+    String? id,
     String? title,
     DateTime? time,
     bool? isActive,
-    Set<String>? days,
+    List<String>? days,
     String? sound,
     bool? isRepeating,
   }) {
@@ -36,4 +36,26 @@ class Alarm {
       isRepeating: isRepeating ?? this.isRepeating,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'time': time.toIso8601String(),
+    'title': title,
+    'sound': sound,
+    'isRepeating': isRepeating,
+    'days': days,
+  };
+
+  // Creates the object from a Map
+  factory Alarm.fromJson(Map<String, dynamic> json) => Alarm(
+    id: json['id'] as String,
+    time: DateTime.parse(json['time'] as String),
+    title: json['title'] as String,
+    sound: json['sound'] as String,
+    isRepeating: json['isRepeating'] as bool,
+    days: List<String>.from(json['days'] as List),
+  );
+
+  // Validation method used by the Save Button logic
+  bool isValid() => days.isNotEmpty;
 }

@@ -7,6 +7,10 @@ class AddAlarm {
   AddAlarm(this.repository);
 
   Future<void> call(Alarm alarm) async {
-    return await repository.addAlarm(alarm);
+    if (alarm.id.isEmpty) {
+      throw Exception('Alarm ID must be set before saving.');
+    }
+
+    await repository.addAlarm(alarm);
   }
 }

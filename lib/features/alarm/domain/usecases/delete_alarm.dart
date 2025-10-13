@@ -5,7 +5,7 @@ class DeleteAlarm {
 
   DeleteAlarm(this.repository);
 
-  Future<void> call(String alarmId) async {
-    return await repository.deleteAlarm(alarmId);
+  Future<void> call(String id) async {
+    await repository.deleteAlarm(id);
   }
 }

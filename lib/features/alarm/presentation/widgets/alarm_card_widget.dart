@@ -13,12 +13,35 @@ class AlarmCardWidget extends StatelessWidget {
     required this.onToggle,
   });
 
+  String _formatRecurrence(Alarm alarm) {
+    if (!alarm.isRepeating) {
+      return 'One-time';
+    }
+    if (alarm.days.length == 7) {
+      return 'Everyday';
+    }
+    if (alarm.days.isEmpty) {
+      return 'One-time';
+    }
+    return alarm.days.join(', ');
+  }
+
   @override
   Widget build(BuildContext context) {
     final TimeOfDay alarmTime = TimeOfDay.fromDateTime(alarm.time);
 
-    final String recurrence = "Everyday";
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      context,
+    );
+
+    final formattedTime = localizations.formatTimeOfDay(
+      alarmTime,
+      alwaysUse24HourFormat: false,
+    );
+
+    final String recurrence = _formatRecurrence(alarm);
     final Color accentColor = Colors.green;
+    final isEnabled = alarm.isActive;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
@@ -28,7 +51,7 @@ class AlarmCardWidget extends StatelessWidget {
           side: BorderSide(width: 1.5, color: accentColor),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -39,19 +62,19 @@ class AlarmCardWidget extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.circle, size: 8, color: accentColor),
-                      SizedBox(width: 8.0),
+                      const SizedBox(width: 8.0),
                       Text(
-                        recurrence,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
+                        alarm.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                   Switch(
-                    value: true,
+                    value: isEnabled,
                     activeThumbColor: Colors.white,
                     activeTrackColor: accentColor,
                     onChanged: onToggle,
@@ -61,8 +84,8 @@ class AlarmCardWidget extends StatelessWidget {
               const SizedBox(height: 8),
 
               Text(
-                alarmTime.format(context),
-                style: TextStyle(
+                formattedTime,
+                style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
@@ -76,7 +99,7 @@ class AlarmCardWidget extends StatelessWidget {
                 children: [
                   Text(
                     recurrence,
-                    style: TextStyle(color: Colors.black87, fontSize: 16),
+                    style: const TextStyle(color: Colors.black87, fontSize: 16),
                   ),
                   IconButton(
                     onPressed: onDelete,
