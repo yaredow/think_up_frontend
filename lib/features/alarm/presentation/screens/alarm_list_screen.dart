@@ -1,192 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:think_up/core/permissions/permission_service.dart';
-import 'package:think_up/features/alarm/domain/entities/alarm.dart';
-import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
-import 'package:think_up/features/alarm/presentation/widgets/alarm_card_widget.dart';
 
-class AlarmListScreen extends StatefulWidget {
+class AlarmListScreen extends StatelessWidget {
   const AlarmListScreen({super.key});
-
-  @override
-  State<AlarmListScreen> createState() => _ScheduleScreenState();
-}
-
-class _ScheduleScreenState extends State<AlarmListScreen>
-    with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    Future.microtask(
-      () => Provider.of<AlarmProvider>(context, listen: false).loadAlarms(),
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.resumed) {
-      _checkPermissionSAfterResume();
-    }
-  }
-
-  Future<void> _checkPermissionSAfterResume() async {
-    final permissionService = context.read<PermissionService>();
-    final notif = await permissionService.isNotificationGranted();
-    final exact = await permissionService.canScheduleExactAlarm();
-    if (!mounted) return;
-    final msg = notif ? "Notification: granted" : "Notification: denied";
-    final exactMsg = exact ? 'Exact alarms: allowed' : 'Exact alarms: denied';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$msg · $exactMsg'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
-  Future<void> onAddAlarmPressed() async {
-    final permissionService = context.read<PermissionService>();
-    final notifGranted =
-        await permissionService.isNotificationGranted() ||
-        await permissionService.requestNotificationPermission();
-
-    if (!notifGranted) {
-      final open = await _showOpenSettingsDialog();
-      if (open == true) {
-        try {
-          await permissionService.openAppSettings();
-        } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Could not open settings')),
-            );
-          }
-        }
-      }
-      return;
-    }
-
-    if (mounted) {
-      await Navigator.of(context).pushNamed("/create-alarm");
-    }
-  }
-
-  Future<bool?> _showOpenSettingsDialog() {
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Notification required"),
-        content: const Text(
-          "Enable notifications to receive alarms. Open app settings?",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text("Cancel"),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text("Open settings"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _showDeleteConfirmationDialog() async {
-    final result = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Delete Alarm?"),
-        content: const Text(
-          "Are you sure you want to permanently delete this alarm?",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text("Cancel"),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-            child: Text("Delete"),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false;
-  }
-
-  Future<void> onAlarmDelete(String alarmId) async {
-    final confirmed = await _showDeleteConfirmationDialog();
-
-    if (!mounted || !confirmed) return;
-
-    final alarmProvider = context.read<AlarmProvider>();
-
-    alarmProvider.deleteAlarm(alarmId);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Alarm Deleted"),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Alarms"),
-        automaticallyImplyLeading: false,
+        title: Text("Alarm"),
+        centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.add), onPressed: onAddAlarmPressed),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed("/create-alarm");
+            },
+            icon: Icon(Icons.add, size: 26),
+          ),
         ],
       ),
-      body: Consumer<AlarmProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.alarms.isEmpty) {
-            return const Center(child: Text("No Alarm Set"));
-          }
-
-          return ListView.builder(
-            itemCount: provider.alarms.length,
-            itemBuilder: (context, index) {
-              final alarm = provider.alarms[index];
-              return AlarmCardWidget(
-                alarm: alarm,
-                onDelete: () => onAlarmDelete(alarm.id.toString()),
-                onToggle: (value) {
-                  print("Toggle alarm");
-                },
-              );
-            },
-          );
-        },
-      ),
+      body: Center(child: Text("Alarm List")),
     );
   }
 }

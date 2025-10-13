@@ -13,15 +13,7 @@ class AlarmTile extends StatelessWidget {
     return ListTile(
       title: Text(alarm.title),
       subtitle: Text(alarm.time.toString()),
-      trailing: IconButton(
-        onPressed: () {
-          Provider.of<AlarmProvider>(
-            context,
-            listen: false,
-          ).deleteAlarm(alarm.id.toString());
-        },
-        icon: Icon(Icons.delete),
-      ),
+      trailing: IconButton(onPressed: () {}, icon: Icon(Icons.delete)),
     );
   }
 }

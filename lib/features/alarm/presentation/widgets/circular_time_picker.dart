@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 
 class CircularTimePicker extends StatefulWidget {
   const CircularTimePicker({super.key});
@@ -11,8 +13,6 @@ class CircularTimePicker extends StatefulWidget {
 }
 
 class _CircularTimePickerState extends State<CircularTimePicker> {
-  DateTime _selectedTime = DateTime.now();
-
   late Timer _timer;
 
   @override
@@ -46,23 +46,28 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     return '$formattedHour:$minute $period';
   }
 
-  void toggleAlarm(String period) {
-    final isCurrentPm = _selectedTime.hour >= 12;
+  void handleToggleAlarm(BuildContext context, period) {
+    final provider = Provider.of<AlarmProvider>(context, listen: false);
+    final currentTime = provider.draftAlarm.time;
+
+    final isCurrentPm = currentTime.hour >= 12;
     bool shouldBePm = (period == "PM");
 
     if (isCurrentPm != shouldBePm) {
-      int newHour = _selectedTime.hour + (shouldBePm ? 12 : -12);
+      int newHour = currentTime.hour + (shouldBePm ? 12 : -12);
 
       newHour = newHour % 24;
 
-      setState(() {
-        _selectedTime = _selectedTime.copyWith(hour: newHour);
-      });
+      final finalTime = currentTime.copyWith(hour: newHour);
+      provider.updateTime(finalTime);
     }
   }
 
   // Determine current AM/PM status for styling the toggle
-  void _updateTimeFromDrag(Offset localPosition, double size) {
+  void _updateTimeFromDrag(BuildContext context, localPosition, double size) {
+    final provider = Provider.of<AlarmProvider>(context, listen: false);
+    final currentTime = provider.draftAlarm.time;
+
     final center = Offset(size / 2, size / 2);
     final dx = localPosition.dx - center.dx;
     final dy = localPosition.dy - center.dy;
@@ -102,24 +107,23 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     // 5. Apply the current AM/PM context to the hour
     // We need to keep the AM/PM of the original time.
     // If the original time was PM (hour >= 12), we add 12 to the new hour
-    if (_selectedTime.hour >= 12 && newHour < 12) {
+    if (currentTime.hour >= 12 && newHour < 12) {
       newHour += 12;
     }
 
-    setState(() {
-      _selectedTime = _selectedTime.copyWith(hour: newHour, minute: newMinute);
-    });
+    final newTime = currentTime.copyWith(hour: newHour, minute: newMinute);
+    provider.updateTime(newTime);
   }
 
-  String _getTimeRemainingText(DateTime time) {
+  String _getTimeRemainingText(DateTime alarmTime, DateTime now) {
     final now = DateTime.now();
 
     DateTime todayAalarmTime = DateTime(
       now.year,
       now.month,
       now.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
+      alarmTime.hour, // Use the passed alarmTime
+      alarmTime.minute,
     );
 
     Duration timeUntilAlarm;
@@ -144,111 +148,117 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size.width * 0.6;
-    final isPm = _selectedTime.hour >= 12;
-    final activeColor = Colors.green.shade400;
 
-    final minuteAngle = _calculateFullTimeAngle(_selectedTime);
+    return Consumer<AlarmProvider>(
+      builder: (context, provider, child) {
+        final selectedTime = provider.draftAlarm.time;
+        final isPm = selectedTime.hour >= 12;
+        final activeColor = Colors.green.shade400;
+        final minuteAngle = _calculateFullTimeAngle(selectedTime);
 
-    return Center(
-      child: Column(
-        children: [
-          GestureDetector(
-            onPanDown: (details) {
-              _updateTimeFromDrag(details.localPosition, size);
-            },
-            onPanUpdate: (details) {
-              _updateTimeFromDrag(details.localPosition, size);
-            },
-            child: SizedBox(
-              height: size,
-              width: size,
-              child: Stack(
-                alignment: Alignment.center,
+        return Center(
+          child: Column(
+            children: [
+              GestureDetector(
+                onPanDown: (details) {
+                  _updateTimeFromDrag(context, details.localPosition, size);
+                },
+                onPanUpdate: (details) {
+                  _updateTimeFromDrag(context, details.localPosition, size);
+                },
+                child: SizedBox(
+                  height: size,
+                  width: size,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CustomPaint(
+                        size: Size(size, size),
+                        // 5. Pass Provider data to the Painter
+                        painter: _CircularTimePainter(
+                          activeColor: activeColor,
+                          trackColor: Colors.grey.shade300,
+                          selectedTime: selectedTime,
+                          currentMinuteAnge: minuteAngle,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Column(
                 children: [
-                  CustomPaint(
-                    size: Size(size, size),
-                    painter: _CircularTimePainter(
-                      activeColor: Colors.green.shade400,
-                      trackColor: Colors.grey.shade300,
-                      selectedTime: _selectedTime,
-                      currentMinuteAnge: minuteAngle,
+                  Text(
+                    _formatTime(selectedTime),
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Container(
+                    height: 35,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // AM/PM toggle
+                        GestureDetector(
+                          onTap: () => handleToggleAlarm(context, 'AM'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: !isPm ? activeColor : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'AM',
+                              style: TextStyle(
+                                color: !isPm ? Colors.white : Colors.black54,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => handleToggleAlarm(context, "PM"),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            width: 50,
+                            decoration: BoxDecoration(
+                              color: isPm ? activeColor : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'PM',
+                              style: TextStyle(
+                                color: isPm ? Colors.white : Colors.black54,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // 8. Countdown Text reads Provider data
+                  Text(
+                    _getTimeRemainingText(selectedTime, DateTime.now()),
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Column(
-            children: [
-              Text(
-                _formatTime(_selectedTime),
-                style: TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 10.0),
-              Container(
-                height: 35,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GestureDetector(
-                      onTap: () => toggleAlarm('AM'),
-                      child: Container(
-                        width: 60,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: !isPm ? activeColor : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'AM',
-                          style: TextStyle(
-                            color: !isPm ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // PM Button
-                    GestureDetector(
-                      onTap: () => toggleAlarm("PM"),
-                      child: Container(
-                        width: 60,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isPm ? activeColor : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'PM',
-                          style: TextStyle(
-                            color: isPm ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              Text(
-                _getTimeRemainingText(_selectedTime),
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

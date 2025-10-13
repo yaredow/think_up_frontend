@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:think_up/features/alarm/presentation/widgets/alarm_settings_form_widget.dart';
 import 'package:think_up/features/alarm/presentation/widgets/circular_time_picker.dart';
+import 'package:think_up/features/alarm/presentation/widgets/day_selector_widget.dart';
+import 'package:think_up/features/alarm/presentation/widgets/new_alarm_save_button.dart';
 
 class AlarmCreationScreen extends StatelessWidget {
   const AlarmCreationScreen({super.key, this.alarmId});
@@ -17,8 +20,20 @@ class AlarmCreationScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
-        child: Column(children: [CircularTimePicker()]),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: ListView(
+          physics: const ClampingScrollPhysics(),
+          children: [
+            const SizedBox(height: 16),
+            CircularTimePicker(),
+            const SizedBox(height: 10),
+            const DaySelectorWidget(),
+            const SizedBox(height: 10),
+            const AlarmSettingsFormWidget(),
+            const SizedBox(height: 30),
+            const NewAlarmSaveButton(),
+          ],
+        ),
       ),
     );
   }
