@@ -33,6 +33,11 @@ class AlarmProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateRepeat(bool isRepeating) {
+    _draftAlarm = _draftAlarm.copyWith(isRepeating: isRepeating);
+    notifyListeners();
+  }
+
   Future<void> saveAlarm() async {
     final newId = DateTime.now().microsecondsSinceEpoch;
     final finalAlarm = _draftAlarm.copyWith(id: newId);
