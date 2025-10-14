@@ -91,6 +91,8 @@ class AlarmProvider extends ChangeNotifier {
 
     await addAlarmUseCase(finalAlarm);
 
+    await loadAlarms();
+
     _resetDraftAlarm();
   }
 }
