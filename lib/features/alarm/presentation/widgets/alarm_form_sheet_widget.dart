@@ -58,7 +58,6 @@ class _AlarmFormSheetWidgetState extends State<AlarmFormSheetWidget> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
       ],
     );
   }

@@ -9,7 +9,7 @@ class AlarmRepositoryImpl implements AlarmRepository {
 
   @override
   Future<void> addAlarm(Alarm alarm) async {
-    await localDataSource.saveAlarm(alarm);
+    await localDataSource.addAlarm(alarm);
   }
 
   @override
@@ -20,5 +20,10 @@ class AlarmRepositoryImpl implements AlarmRepository {
   @override
   Future<void> deleteAlarm(String id) async {
     await localDataSource.deleteAlarm(id);
+  }
+
+  @override
+  Future<void> updateAlarm(Alarm alarm) async {
+    await localDataSource.updateAlarm(alarm);
   }
 }

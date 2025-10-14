@@ -19,20 +19,21 @@ class AlarmCreationScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: ListView(
-          physics: const ClampingScrollPhysics(),
-          children: [
-            const SizedBox(height: 16),
-            CircularTimePicker(),
-            const SizedBox(height: 10),
-            const DaySelectorWidget(),
-            const SizedBox(height: 10),
-            const AlarmSettingsFormWidget(),
-            const SizedBox(height: 30),
-            const NewAlarmSaveButton(),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              CircularTimePicker(),
+              const SizedBox(height: 10),
+              const DaySelectorWidget(),
+              const SizedBox(height: 10),
+              const AlarmSettingsFormWidget(),
+              const SizedBox(height: 26),
+              NewAlarmSaveButton(),
+            ],
+          ),
         ),
       ),
     );

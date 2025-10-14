@@ -9,6 +9,7 @@ import 'package:think_up/features/alarm/data/repositories/alarm_repository_impl.
 import 'package:think_up/features/alarm/domain/usecases/add_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
+import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 
 void main() async {
@@ -26,6 +27,7 @@ void main() async {
   final addAlarmUseCase = AddAlarm(alarmRepository);
   final getAlarmsUseCase = GetAlarms(alarmRepository);
   final deleteAlarmUseCase = DeleteAlarm(alarmRepository);
+  final updateAlarmUseCase = UpdateAlarm(alarmRepository);
   final PermissionService permissionService = PermissionServiceImpl();
 
   runApp(
@@ -37,6 +39,7 @@ void main() async {
             addAlarmUseCase: addAlarmUseCase,
             getAlarmsUseCase: getAlarmsUseCase,
             deleteAlarmUseCase: deleteAlarmUseCase,
+            updateAlarmUseCase: updateAlarmUseCase,
           ),
         ),
       ],

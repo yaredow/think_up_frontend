@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 import 'package:think_up/features/alarm/presentation/widgets/alarm_card_widget.dart';
 
@@ -20,7 +21,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
     });
   }
 
-  void handleOnDeleteAlarm(
+  void _handleOnDeleteAlarm(
     BuildContext context,
     String id,
     String title,
@@ -70,6 +71,18 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
     }
   }
 
+  void _handleOnEditAlarm(BuildContext context, Alarm alarm) async {
+    final provider = Provider.of<AlarmProvider>(context, listen: false);
+
+    provider.loadAlarmForEdit(alarm.id);
+
+    final result = await Navigator.of(context).pushNamed("/create-alarm");
+
+    if (result == true) {
+      provider.loadAlarms();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,16 +120,15 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
                 return AlarmCardWidget(
                   alarm: alarm,
                   onDelete: () =>
-                      handleOnDeleteAlarm(context, alarm.id, alarm.title),
-                  // TODO: Implement actual toggle logic in the Provider
+                      _handleOnDeleteAlarm(context, alarm.id, alarm.title),
                   onToggle: (isActive) {
-                    // Example: provider.toggleAlarm(alarm.id, isActive);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${alarm.title} toggled $isActive'),
                       ),
                     );
                   },
+                  onEdit: () => _handleOnEditAlarm(context, alarm),
                 );
               },
             );

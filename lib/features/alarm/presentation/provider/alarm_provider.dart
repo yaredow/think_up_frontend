@@ -3,12 +3,14 @@ import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/add_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
+import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:uuid/uuid.dart';
 
 class AlarmProvider extends ChangeNotifier {
   final AddAlarm addAlarmUseCase;
   final GetAlarms getAlarmsUseCase;
   final DeleteAlarm deleteAlarmUseCase;
+  final UpdateAlarm updateAlarmUseCase;
 
   final _uuid = const Uuid();
 
@@ -25,6 +27,7 @@ class AlarmProvider extends ChangeNotifier {
   );
 
   Alarm get draftAlarm => _draftAlarm;
+  bool get isEditing => !draftAlarm.id.startsWith("draft-id");
 
   bool get isAlarmReadyToSave {
     return _draftAlarm.days.isNotEmpty;
@@ -34,6 +37,7 @@ class AlarmProvider extends ChangeNotifier {
     required this.addAlarmUseCase,
     required this.getAlarmsUseCase,
     required this.deleteAlarmUseCase,
+    required this.updateAlarmUseCase,
   });
 
   void updateTime(DateTime newTime) {
@@ -86,10 +90,14 @@ class AlarmProvider extends ChangeNotifier {
       throw Exception("Alarm requires at least one day selected.");
     }
 
-    final newId = _uuid.v4();
-    final finalAlarm = _draftAlarm.copyWith(id: newId);
+    final alarmToSave = _draftAlarm;
 
-    await addAlarmUseCase(finalAlarm);
+    if (isEditing) {
+      await updateAlarmUseCase(alarmToSave);
+    } else {
+      final newAlarmWithId = alarmToSave.copyWith(id: _uuid.v4());
+      await addAlarmUseCase(newAlarmWithId);
+    }
 
     await loadAlarms();
 
@@ -101,9 +109,22 @@ class AlarmProvider extends ChangeNotifier {
       await deleteAlarmUseCase(id);
 
       await loadAlarms();
+
+      _resetDraftAlarm();
     } catch (e) {
       debugPrint('Error deleting alarm: $e');
       throw Exception('Failed to delete alarm');
+    }
+  }
+
+  void loadAlarmForEdit(String id) {
+    try {
+      final alarmToEdit = _savedAlarms.firstWhere((alarm) => alarm.id == id);
+
+      _draftAlarm = alarmToEdit;
+    } catch (e) {
+      debugPrint('Error loading alarm for edit: $e');
+      _resetDraftAlarm();
     }
   }
 }

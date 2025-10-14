@@ -41,12 +41,15 @@ class _SettingsScreenState extends State<DaySelectorWidget> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Settings",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Colors.black54,
+            Padding(
+              padding: const EdgeInsets.only(left: 11),
+              child: Text(
+                "Settings",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey.shade500,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             const SizedBox(height: 10),
