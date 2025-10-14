@@ -95,4 +95,15 @@ class AlarmProvider extends ChangeNotifier {
 
     _resetDraftAlarm();
   }
+
+  Future<void> deleteAlarm(String id) async {
+    try {
+      await deleteAlarmUseCase(id);
+
+      await loadAlarms();
+    } catch (e) {
+      debugPrint('Error deleting alarm: $e');
+      throw Exception('Failed to delete alarm');
+    }
+  }
 }

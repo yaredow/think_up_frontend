@@ -51,7 +51,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
 
     if (confirmed == true) {
       try {
-        await provider.deleteAlarmUseCase(id);
+        await provider.deleteAlarm(id);
 
         if (!context.mounted) return;
 
