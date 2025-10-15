@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:think_up/app/app.dart';
+import 'package:think_up/core/notification/notification_service.dart';
 import 'package:think_up/core/permissions/permission_service.dart';
 import 'package:think_up/core/permissions/permission_service_impl.dart';
 import 'package:think_up/features/alarm/data/datasources/alarm_local_data_source.dart';
@@ -11,9 +12,17 @@ import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
 import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  tz.initializeTimeZones();
+
+  tz.setLocalLocation(tz.local);
+
+  await NotificationService.instance.initialized();
 
   final SharedPreferences sharedPreferences =
       await SharedPreferences.getInstance();
@@ -40,6 +49,7 @@ void main() async {
             getAlarmsUseCase: getAlarmsUseCase,
             deleteAlarmUseCase: deleteAlarmUseCase,
             updateAlarmUseCase: updateAlarmUseCase,
+            notificationService: NotificationService.instance,
           ),
         ),
       ],

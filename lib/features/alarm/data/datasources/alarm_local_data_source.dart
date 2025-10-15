@@ -7,7 +7,7 @@ const String kAlarmsKey = 'ALARMS_LIST_KEY';
 abstract class AlarmLocalDataSource {
   Future<void> addAlarm(Alarm alarm);
   Future<List<Alarm>> getAlarms();
-  Future<void> deleteAlarm(String id);
+  Future<void> deleteAlarm(int id);
   Future<void> updateAlarm(Alarm updatedAlarm);
 }
 
@@ -76,7 +76,7 @@ class AlarmLocalDataSourceImpl implements AlarmLocalDataSource {
   }
 
   @override
-  Future<void> deleteAlarm(String id) async {
+  Future<void> deleteAlarm(int id) async {
     final List<String> existingAlarmsJson =
         sharedPreferences.getStringList(kAlarmsKey) ?? [];
 

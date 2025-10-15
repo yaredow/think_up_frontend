@@ -18,7 +18,7 @@ class AlarmRepositoryImpl implements AlarmRepository {
   }
 
   @override
-  Future<void> deleteAlarm(String id) async {
+  Future<void> deleteAlarm(int id) async {
     await localDataSource.deleteAlarm(id);
   }
 

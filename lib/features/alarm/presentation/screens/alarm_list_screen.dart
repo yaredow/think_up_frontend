@@ -21,11 +21,7 @@ class _AlarmListScreenState extends State<AlarmListScreen> {
     });
   }
 
-  void _handleOnDeleteAlarm(
-    BuildContext context,
-    String id,
-    String title,
-  ) async {
+  void _handleOnDeleteAlarm(BuildContext context, int id, String title) async {
     final provider = Provider.of<AlarmProvider>(context, listen: false);
 
     final bool? confirmed = await showDialog(

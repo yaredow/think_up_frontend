@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:think_up/core/notification/notification_service.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 import 'package:think_up/features/alarm/presentation/widgets/ringtone_selection_widget.dart';
 import 'alarm_name_field_widget.dart';
 
 class AlarmSettingsFormWidget extends StatelessWidget {
   const AlarmSettingsFormWidget({super.key});
+  static final NotificationService notificationService =
+      NotificationService.instance;
 
   Widget _buildSettingRow({
     required String title,
@@ -46,7 +49,7 @@ class AlarmSettingsFormWidget extends StatelessWidget {
 
     return Column(
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: AlarmNameFieldWidget(),
         ),
@@ -80,21 +83,14 @@ class AlarmSettingsFormWidget extends StatelessWidget {
                       ],
                     ),
                     onTap: () async {
-                      final selectedId = await showModalBottomSheet<String>(
+                      showModalBottomSheet<void>(
                         context: context,
                         builder: (context) {
                           return RingtoneSelectionWidget(
-                            selectedRingtoneId: draftAlarm.sound,
-                            onRingtoneSelected: (ringtonId) {
-                              Navigator.of(context).pop(ringtonId);
-                            },
+                            onSelectionConfirmed: provider.updateSound,
                           );
                         },
                       );
-                      if (selectedId != null &&
-                          selectedId != draftAlarm.sound) {
-                        provider.updateSound(selectedId);
-                      }
                     },
                     showDivider: true,
                   ),

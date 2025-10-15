@@ -1,5 +1,5 @@
 class Alarm {
-  final String id;
+  final int id;
   final String title;
   final DateTime time;
   final bool isActive;
@@ -18,7 +18,7 @@ class Alarm {
   });
 
   Alarm copyWith({
-    String? id,
+    int? id,
     String? title,
     DateTime? time,
     bool? isActive,
@@ -48,7 +48,9 @@ class Alarm {
 
   // Creates the object from a Map
   factory Alarm.fromJson(Map<String, dynamic> json) => Alarm(
-    id: json['id'] as String,
+    id: json['id'] is int
+        ? json['id'] as int
+        : int.parse(json['id'].toString()),
     time: DateTime.parse(json['time'] as String),
     title: json['title'] as String,
     sound: json['sound'] as String,

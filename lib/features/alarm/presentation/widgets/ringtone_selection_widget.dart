@@ -80,7 +80,13 @@ class _RingtoneSelectionWidgetState extends State<RingtoneSelectionWidget> {
                     widget.onSelectionConfirmed(_currentlySelected);
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Done', style: TextStyle(fontSize: 18)),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.green.shade600,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -88,6 +94,7 @@ class _RingtoneSelectionWidgetState extends State<RingtoneSelectionWidget> {
           const Divider(height: 1),
           Expanded(
             child: RadioGroup<String>(
+              groupValue: _currentlySelected,
               onChanged: (value) {
                 if (value == null) return;
                 final ringtone = kAvailableRingtones.firstWhere(
@@ -104,11 +111,15 @@ class _RingtoneSelectionWidgetState extends State<RingtoneSelectionWidget> {
                   final ringtone = kAvailableRingtones[index];
                   final isSelected = ringtone.id == _currentlySelected;
 
-                  return RadioListTile<String>(
-                    value: ringtone.id,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    selected: isSelected,
+                  return ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    selected: isSelected,
+                    onTap: () {
+                      RadioGroup.maybeOf<String>(
+                        context,
+                      )?.onChanged(ringtone.id);
+                    },
+                    leading: Radio<String>(value: ringtone.id),
                     title: Text(
                       ringtone.name,
                       style: _titleStyle(isSelected, context),

@@ -5,7 +5,7 @@ abstract class AlarmRepository {
 
   Future<List<Alarm>> getAlarms();
 
-  Future<void> deleteAlarm(String id);
+  Future<void> deleteAlarm(int id);
 
   Future<void> updateAlarm(Alarm alarm);
 }

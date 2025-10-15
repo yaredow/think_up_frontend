@@ -12,6 +12,7 @@ class ThinkUp extends StatelessWidget {
       theme: AppTheme.lightTheme(),
       onGenerateRoute: AppRouter.generateRoute,
       initialRoute: "/alarm",
+      navigatorKey: AppRouter.navigatorKey,
       debugShowCheckedModeBanner: false,
     );
   }
