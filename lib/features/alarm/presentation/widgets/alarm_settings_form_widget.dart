@@ -80,15 +80,21 @@ class AlarmSettingsFormWidget extends StatelessWidget {
                       ],
                     ),
                     onTap: () async {
-                      final selectedId = await showModalBottomSheet(
+                      final selectedId = await showModalBottomSheet<String>(
                         context: context,
                         builder: (context) {
                           return RingtoneSelectionWidget(
-                            selectedRingtoneId: "",
-                            onRingtoneSelected: (value) {},
+                            selectedRingtoneId: draftAlarm.sound,
+                            onRingtoneSelected: (ringtonId) {
+                              Navigator.of(context).pop(ringtonId);
+                            },
                           );
                         },
                       );
+                      if (selectedId != null &&
+                          selectedId != draftAlarm.sound) {
+                        provider.updateSound(selectedId);
+                      }
                     },
                     showDivider: true,
                   ),

@@ -60,6 +60,11 @@ class AlarmProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateSound(String soundId) {
+    _draftAlarm = _draftAlarm.copyWith(sound: soundId);
+    notifyListeners();
+  }
+
   void _resetDraftAlarm() {
     _draftAlarm = Alarm(
       id: 'draft-id-${_uuid.v4()}',
