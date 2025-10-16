@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class CircularTimePicker extends StatefulWidget {
   const CircularTimePicker({super.key});
@@ -100,7 +101,7 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
       }
     }
 
-    // 4. Convert total minutes into hour and minute components
+    // 4. Conver total minutes into hour and minute components
     int newHour = (totalMinutes ~/ 60); // Hours (0-11)
     int newMinute = totalMinutes % 60; // Minutes (0-59)
 
@@ -115,33 +116,15 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     provider.updateTime(newTime);
   }
 
-  String _getTimeRemainingText(DateTime alarmTime, DateTime now) {
-    final now = DateTime.now();
+  String _getTimeRemainingText(AlarmProvider provider) {
+    final now = tz.TZDateTime.now(tz.local);
+    final nextAlarm = provider.nextOccurrenceForDraft();
+    final diff = nextAlarm.difference(now);
+    final hours = diff.inHours;
+    final minutes = diff.inMinutes.remainder(60);
 
-    DateTime todayAalarmTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      alarmTime.hour, // Use the passed alarmTime
-      alarmTime.minute,
-    );
-
-    Duration timeUntilAlarm;
-
-    if (todayAalarmTime.isAfter(now)) {
-      timeUntilAlarm = todayAalarmTime.difference(now);
-    } else {
-      final tomorrowAlarmTime = todayAalarmTime.add(const Duration(days: 1));
-      timeUntilAlarm = tomorrowAlarmTime.difference(now);
-    }
-
-    final totalMinutes = timeUntilAlarm.inMinutes;
-    final hours = totalMinutes ~/ 60;
-    final minutes = totalMinutes % 60;
-
-    String hoursText = hours == 1 ? '1 hour' : '$hours hours';
-    String minutesText = minutes == 1 ? '1 minute' : '$minutes minutes';
-
+    final hoursText = hours == 1 ? '1 hour' : '$hours hours';
+    final minutesText = minutes == 1 ? '1 minute' : '$minutes minutes';
     return 'Alarm in $hoursText $minutesText';
   }
 
@@ -250,7 +233,7 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
                   const SizedBox(height: 10),
                   // 8. Countdown Text reads Provider data
                   Text(
-                    _getTimeRemainingText(selectedTime, DateTime.now()),
+                    _getTimeRemainingText(provider),
                     style: const TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                 ],

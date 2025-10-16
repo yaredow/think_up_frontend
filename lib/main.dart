@@ -14,13 +14,17 @@ import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   tz.initializeTimeZones();
 
-  tz.setLocalLocation(tz.local);
+  final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+  final timeZoneName = timezoneInfo.identifier;
+
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
 
   await NotificationService.instance.initialized();
 

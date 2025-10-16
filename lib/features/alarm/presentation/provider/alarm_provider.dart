@@ -48,7 +48,6 @@ class AlarmProvider extends ChangeNotifier {
   }
 
   tz.TZDateTime _nextAlarmTime(TimeOfDay time, List<String> days) {
-    // Get current time with high precision
     final now = tz.TZDateTime.now(tz.local);
 
     // minute or a past minute is correctly scheduled for the next valid time.
@@ -82,7 +81,7 @@ class AlarmProvider extends ChangeNotifier {
     for (int i = 0; i < 7; i++) {
       final nextDay = now.add(Duration(days: i));
 
-      final dayName = DateFormat('EEEE').format(nextDay);
+      final dayName = DateFormat('EEE').format(nextDay);
 
       if (days.contains(dayName)) {
         var scheduledDate = tz.TZDateTime(
@@ -237,5 +236,10 @@ class AlarmProvider extends ChangeNotifier {
       debugPrint('Error deleting alarm: $e');
       throw Exception('Failed to delete alarm');
     }
+  }
+
+  tz.TZDateTime nextOccurrenceForDraft() {
+    final time = _getTimeOfDay(_draftAlarm.time);
+    return _nextAlarmTime(time, _draftAlarm.days);
   }
 }
