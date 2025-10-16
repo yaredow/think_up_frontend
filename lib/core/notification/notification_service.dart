@@ -17,17 +17,6 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  void triggerAlarmTapNow(String alarmId) {
-    final testPayload = alarmId.toString();
-
-    // This directly calls the same navigation logic as onDidReceiveNotificationResponse
-    AppRouter.pushNamed("/alarm-ring", arguments: {'alarmId': testPayload});
-
-    print(
-      "DEBUG: Immediately triggered navigation to /alarm-ring with ID: $alarmId",
-    );
-  }
-
   // initialize the plugin
   Future<void> initialized() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -60,7 +49,7 @@ class NotificationService {
     );
   }
 
-  // request permission for moder android
+  // request permission for modern android
   Future<void> requestPermssion() async {
     final androidImplimentation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -86,7 +75,7 @@ class NotificationService {
           channelDescription: "Channel for scheduled alarms",
           importance: Importance.max,
           priority: Priority.high,
-          ticker: "alarm_ticker",
+          category: AndroidNotificationCategory.alarm,
           fullScreenIntent: true,
         );
 
@@ -108,8 +97,6 @@ class NotificationService {
       scheduledTime,
       notificationDetails,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-
       payload: payload ?? id.toString(),
     );
 

@@ -6,6 +6,7 @@ import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
 import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:timezone/timezone.dart' as tz;
+import 'package:intl/intl.dart';
 
 class AlarmProvider extends ChangeNotifier {
   final AddAlarm addAlarmUseCase;
@@ -18,7 +19,6 @@ class AlarmProvider extends ChangeNotifier {
   List<Alarm> get savedAlarms => _savedAlarms;
 
   static const int DRAFT_ID_TEMP = 0;
-  // The draft alarm still uses String ID and DateTime time
   Alarm _draftAlarm = Alarm(
     id: DRAFT_ID_TEMP,
     title: 'Wake up',
@@ -47,21 +47,67 @@ class AlarmProvider extends ChangeNotifier {
     return TimeOfDay(hour: time.hour, minute: time.minute);
   }
 
-  tz.TZDateTime _nextAlarmTime(TimeOfDay time) {
+  tz.TZDateTime _nextAlarmTime(TimeOfDay time, List<String> days) {
+    // Get current time with high precision
     final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(
+
+    // minute or a past minute is correctly scheduled for the next valid time.
+    final normalizedNow = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
       now.day,
-      time.hour,
-      time.minute,
-    );
+      now.hour,
+      now.minute,
+    ).add(const Duration(minutes: 1));
 
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
+    if (days.isEmpty) {
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        time.hour,
+        time.minute,
+      );
+
+      // If the scheduled time is BEFORE the next minute (normalizedNow),
+      // schedule for tomorrow.
+      if (scheduledDate.isBefore(normalizedNow)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+      return scheduledDate;
     }
-    return scheduled;
+
+    for (int i = 0; i < 7; i++) {
+      final nextDay = now.add(Duration(days: i));
+
+      final dayName = DateFormat('EEEE').format(nextDay);
+
+      if (days.contains(dayName)) {
+        var scheduledDate = tz.TZDateTime(
+          tz.local,
+          nextDay.year,
+          nextDay.month,
+          nextDay.day,
+          time.hour,
+          time.minute,
+        );
+
+        // If we are on the same day (i=0), we must check if the time has passed
+        if (i == 0) {
+          if (scheduledDate.isBefore(normalizedNow)) {
+            continue;
+          }
+        }
+
+        // If it's a future day (i > 0) or the current day but the time hasn't passed, return it.
+        return scheduledDate;
+      }
+    }
+
+    // but we must return a value.
+    return now.add(const Duration(minutes: 1));
   }
   // ----------------------------------------------------------------------
 
@@ -159,7 +205,11 @@ class AlarmProvider extends ChangeNotifier {
 
     if (alarmToSchedule.isActive && alarmToSchedule.days.isNotEmpty) {
       final TimeOfDay alarmTime = _getTimeOfDay(alarmToSchedule.time);
-      final tz.TZDateTime scheduledTime = _nextAlarmTime(alarmTime);
+      // Pass the days to the scheduling function
+      final tz.TZDateTime scheduledTime = _nextAlarmTime(
+        alarmTime,
+        alarmToSchedule.days,
+      );
 
       await notificationService.scheduleAlarm(
         alarmToSchedule.id,
