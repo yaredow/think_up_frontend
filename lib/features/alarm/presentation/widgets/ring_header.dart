@@ -57,10 +57,7 @@ class _RingHeaderState extends State<RingHeader> {
       color: Colors.white70,
       letterSpacing: 1.2,
     );
-    final labelStyle = Theme.of(context).textTheme.headlineSmall?.copyWith(
-      color: Colors.white,
-      fontWeight: FontWeight.w500,
-    );
+
     final nextStyle = Theme.of(
       context,
     ).textTheme.bodyMedium?.copyWith(color: Colors.white70);

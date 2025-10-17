@@ -239,6 +239,22 @@ class AlarmProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> snoozeAlarm(int id, Duration snoozeDutration) async {
+    final alarm = findAlarm(id);
+
+    if (alarm == null) return;
+
+    final snoozeTime = tz.TZDateTime.now(tz.local).add(snoozeDutration);
+
+    await notificationService.scheduleAlarm(
+      alarm.id,
+      alarm.title,
+      "Snoozed: ${alarm.title}",
+      snoozeTime,
+      payload: alarm.id.toString(),
+    );
+  }
+
   tz.TZDateTime nextOccurrenceForDraft() {
     final time = _getTimeOfDay(_draftAlarm.time);
     return _nextAlarmTime(time, _draftAlarm.days);

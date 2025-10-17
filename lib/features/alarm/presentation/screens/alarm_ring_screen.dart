@@ -44,7 +44,15 @@ class _AlarmRingScreenState extends State<AlarmRingScreen> {
     if (mounted) Navigator.of(context).pop();
   }
 
-  void _snoozeAlarm() async {
+  Future<void> _snoozeAlarm() async {
+    final alarmId = int.tryParse(widget.alarmId);
+    if (alarmId != null) {
+      await context.read<AlarmProvider>().snoozeAlarm(
+        alarmId,
+        const Duration(minutes: 5),
+      );
+    }
+
     await _player.stop();
     if (mounted) Navigator.of(context).pop();
   }
