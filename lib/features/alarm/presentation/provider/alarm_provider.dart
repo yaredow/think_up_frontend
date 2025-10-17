@@ -5,6 +5,7 @@ import 'package:think_up/features/alarm/domain/usecases/add_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
 import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
+import 'package:think_up/features/alarm/presentation/models/ringtone_options.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
 
@@ -24,7 +25,7 @@ class AlarmProvider extends ChangeNotifier {
     title: 'Wake up',
     time: DateTime.now().copyWith(second: 0, millisecond: 0),
     days: [],
-    sound: 'Default',
+    sound: kAvailableRingtones.first.id,
     isRepeating: true,
   );
 
@@ -145,7 +146,7 @@ class AlarmProvider extends ChangeNotifier {
       title: 'Wake up',
       time: DateTime.now().copyWith(second: 0, millisecond: 0),
       days: [],
-      sound: 'Default',
+      sound: kAvailableRingtones.first.id,
       isRepeating: true,
     );
     notifyListeners();
@@ -241,5 +242,22 @@ class AlarmProvider extends ChangeNotifier {
   tz.TZDateTime nextOccurrenceForDraft() {
     final time = _getTimeOfDay(_draftAlarm.time);
     return _nextAlarmTime(time, _draftAlarm.days);
+  }
+
+  Alarm? findAlarm(int id) {
+    try {
+      return _savedAlarms.firstWhere((alarm) => alarm.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String resolveRingtoneAsset(String soundId) {
+    return kAvailableRingtones
+        .firstWhere(
+          (option) => option.id == soundId,
+          orElse: () => kAvailableRingtones.first,
+        )
+        .assetPath;
   }
 }

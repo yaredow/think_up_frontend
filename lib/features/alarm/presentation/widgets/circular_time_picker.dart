@@ -83,36 +83,19 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
     }
 
     // convert the angle back to total minutes
-    int totalMinutes = (angle / (2 * pi) * 720).round();
+    final angleRatio = angle / (2 * pi);
+    int totalMinutes = (angleRatio * 720).round() % 720;
 
-    // Snap to the nearest 5 minutes for smoother UI movement
-    int minuteToSnap = totalMinutes % 60;
+    final newHour = totalMinutes ~/ 60;
+    final newMinute = totalMinutes % 60;
 
-    // Round to the nearest 5 minute interval
-    if (minuteToSnap % 5 != 0) {
-      minuteToSnap = (minuteToSnap / 5).round() * 5;
-
-      // Update totalMinutes with the snapped minute
-      totalMinutes = (totalMinutes ~/ 60) * 60 + minuteToSnap;
-
-      // Correct for wrap-around if snapping pushed minutes past 59
-      if (totalMinutes >= 720) {
-        totalMinutes = 0;
-      }
+    // Apply the current AM/PM context to the hour
+    var adjustedHour = newHour;
+    if (currentTime.hour >= 12 && adjustedHour < 12) {
+      adjustedHour += 12;
     }
 
-    // 4. Conver total minutes into hour and minute components
-    int newHour = (totalMinutes ~/ 60); // Hours (0-11)
-    int newMinute = totalMinutes % 60; // Minutes (0-59)
-
-    // 5. Apply the current AM/PM context to the hour
-    // We need to keep the AM/PM of the original time.
-    // If the original time was PM (hour >= 12), we add 12 to the new hour
-    if (currentTime.hour >= 12 && newHour < 12) {
-      newHour += 12;
-    }
-
-    final newTime = currentTime.copyWith(hour: newHour, minute: newMinute);
+    final newTime = currentTime.copyWith(hour: adjustedHour, minute: newMinute);
     provider.updateTime(newTime);
   }
 
@@ -190,7 +173,6 @@ class _CircularTimePickerState extends State<CircularTimePicker> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // AM/PM toggle
                         GestureDetector(
                           onTap: () => handleToggleAlarm(context, 'AM'),
                           child: Container(
@@ -308,8 +290,6 @@ class _CircularTimePainter extends CustomPainter {
 
     final handleX = center.dx + trackRadius * cos(startAngle + sweepAngle);
     final handleY = center.dy + trackRadius * sin(startAngle + sweepAngle);
-
-    // --- DRAWING THE CUSTOM HANDLE ---
 
     // 1. Draw the Outer White Circle (Handle Background)
     final handleOuterPaint = Paint()
