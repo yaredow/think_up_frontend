@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:provider/provider.dart';
 import 'package:think_up/app/router.dart';
+import 'package:think_up/core/alarm_audio_controller.dart';
+import 'package:think_up/features/alarm/presentation/provider/alarm_provider.dart';
+import 'package:think_up/features/puzzle/presentation/alarm_puzzle_dispatcher_screen.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
@@ -39,12 +43,30 @@ class NotificationService {
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
         final payload = response.payload;
+        if (payload == null || payload.isEmpty) return;
 
-        if (payload != null && payload.isNotEmpty) {
-          final alarmId = payload.toString();
+        final alarmId = int.tryParse(payload);
+        if (alarmId == null) return;
 
-          AppRouter.pushNamed("/alarm-ring", arguments: {"alarmId": alarmId});
-        }
+        final ctx = AppRouter.navigatorKey.currentContext;
+
+        if (ctx == null) return;
+
+        final alarmProvider = ctx.read<AlarmProvider>();
+
+        final alarm = await alarmProvider.getAlarmById(alarmId);
+
+        final assetPath = alarmProvider.resolveRingtoneAsset(
+          alarm?.sound ?? alarmProvider.draftAlarm.sound,
+        );
+
+        await AlarmAudioController.instance.start(assetPath);
+        AppRouter.navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (_) => AlarmPuzzleDispatcherScreen(alarmId: alarmId),
+          ),
+        );
       },
     );
   }
@@ -106,22 +128,5 @@ class NotificationService {
   Future<void> cancelAlarm(int id) async {
     await flutterLocalNotificationsPlugin.cancel(id);
     debugPrint('Canceled scheduled alarm with ID: $id');
-  }
-
-  tz.TZDateTime _nextAlarmTime(TimeOfDay time) {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
-
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
-    }
-    return scheduled;
   }
 }

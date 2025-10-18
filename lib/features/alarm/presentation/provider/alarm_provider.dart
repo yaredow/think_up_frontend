@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:think_up/core/notification/notification_service.dart';
+import 'package:think_up/core/permissions/permission_service.dart';
 import 'package:think_up/features/alarm/domain/entities/alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/add_alarm.dart';
 import 'package:think_up/features/alarm/domain/usecases/delete_alarm.dart';
+import 'package:think_up/features/alarm/domain/usecases/get_alarm_by_id.dart';
 import 'package:think_up/features/alarm/domain/usecases/get_alarms.dart';
 import 'package:think_up/features/alarm/domain/usecases/update_alarm.dart';
 import 'package:think_up/features/alarm/presentation/models/ringtone_options.dart';
@@ -14,7 +17,9 @@ class AlarmProvider extends ChangeNotifier {
   final GetAlarms getAlarmsUseCase;
   final DeleteAlarm deleteAlarmUseCase;
   final UpdateAlarm updateAlarmUseCase;
+  final GetAlarmById getAlarmByIdUseCase;
   final NotificationService notificationService;
+  final PermissionService permissionService;
 
   List<Alarm> _savedAlarms = [];
   List<Alarm> get savedAlarms => _savedAlarms;
@@ -42,6 +47,8 @@ class AlarmProvider extends ChangeNotifier {
     required this.deleteAlarmUseCase,
     required this.updateAlarmUseCase,
     required this.notificationService,
+    required this.getAlarmByIdUseCase,
+    required this.permissionService,
   });
 
   TimeOfDay _getTimeOfDay(DateTime time) {
@@ -178,9 +185,50 @@ class AlarmProvider extends ChangeNotifier {
     }
   }
 
+  Future<Alarm?> getAlarmById(int id) async {
+    try {
+      final alarm = await getAlarmByIdUseCase(id);
+
+      if (alarm != null) {
+        final index = _savedAlarms.indexWhere((item) => item.id == id);
+
+        if (index >= 0) {
+          _savedAlarms[index] = alarm;
+        } else {
+          _savedAlarms.add(alarm);
+        }
+        notifyListeners();
+      }
+
+      return alarm;
+    } catch (e) {
+      debugPrint('Error getting alarm by ID: $e');
+      return null;
+    }
+  }
+
   Future<void> saveAlarm() async {
     if (!isAlarmReadyToSave) {
       throw Exception("Alarm requires at least one day selected.");
+    }
+
+    final hasExact = await permissionService.canScheduleExactAlarm();
+
+    if (!hasExact) {
+      final granted = await permissionService.requestScheduleExactAlarm();
+
+      if (!granted) {
+        debugPrint('Exact alarm permission not granted.');
+        await loadAlarms();
+        _resetDraftAlarm();
+        return;
+      }
+    }
+
+    final hasNoti = await permissionService.isNotificationGranted();
+
+    if (!hasNoti) {
+      await permissionService.requestNotificationPermission();
     }
 
     Alarm alarmToSchedule;
@@ -188,10 +236,8 @@ class AlarmProvider extends ChangeNotifier {
     if (isEditing) {
       alarmToSchedule = _draftAlarm;
 
-      // 1. Cancel the old notification using the consistent INT ID
       await notificationService.cancelAlarm(alarmToSchedule.id);
 
-      // 2. Persist the updated alarm
       await updateAlarmUseCase(alarmToSchedule);
     } else {
       // 1. Create new alarm: assign a unique INT ID.

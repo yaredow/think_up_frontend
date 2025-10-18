@@ -26,4 +26,9 @@ class AlarmRepositoryImpl implements AlarmRepository {
   Future<void> updateAlarm(Alarm alarm) async {
     await localDataSource.updateAlarm(alarm);
   }
+
+  @override
+  Future<Alarm?> getAlarmById(int id) async {
+    return await localDataSource.getAlarmById(id);
+  }
 }

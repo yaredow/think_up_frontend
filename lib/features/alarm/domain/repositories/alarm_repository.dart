@@ -8,4 +8,6 @@ abstract class AlarmRepository {
   Future<void> deleteAlarm(int id);
 
   Future<void> updateAlarm(Alarm alarm);
+
+  Future<Alarm?> getAlarmById(int id);
 }

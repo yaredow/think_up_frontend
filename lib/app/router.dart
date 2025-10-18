@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:think_up/features/alarm/presentation/screens/alarm_creation_screen.dart';
 import 'package:think_up/app/main_screen.dart';
 import 'package:think_up/features/alarm/presentation/screens/alarm_ring_screen.dart';
+import 'package:think_up/features/puzzle/presentation/alarm_puzzle_dispatcher_screen.dart';
 
 class AppRouter {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -26,7 +27,13 @@ class AppRouter {
       case "/alarm-ring":
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
-          builder: (_) => AlarmRingScreen(alarmId: args?['alarmId'] as String),
+          builder: (_) => AlarmRingScreen(alarmId: args?['alarmId'] as int),
+        );
+      case "/puzzle-launcher":
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) =>
+              AlarmPuzzleDispatcherScreen(alarmId: args?['alarmId'] as int),
         );
       default:
         return MaterialPageRoute(

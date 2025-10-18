@@ -9,6 +9,7 @@ abstract class AlarmLocalDataSource {
   Future<List<Alarm>> getAlarms();
   Future<void> deleteAlarm(int id);
   Future<void> updateAlarm(Alarm updatedAlarm);
+  Future<Alarm?> getAlarmById(int id);
 }
 
 class AlarmLocalDataSourceImpl implements AlarmLocalDataSource {
@@ -88,5 +89,21 @@ class AlarmLocalDataSourceImpl implements AlarmLocalDataSource {
     }).toList();
 
     await sharedPreferences.setStringList(kAlarmsKey, updatedAlarmsJson);
+  }
+
+  @override
+  Future<Alarm?> getAlarmById(int id) async {
+    final List<String>? alarmsJsonStrings = sharedPreferences.getStringList(
+      kAlarmsKey,
+    );
+    if (alarmsJsonStrings == null) return null;
+
+    for (final jsonString in alarmsJsonStrings) {
+      final Map<String, dynamic> jsonMap = json.decode(jsonString);
+      if (jsonMap['id'] == id) {
+        return Alarm.fromJson(jsonMap);
+      }
+    }
+    return null;
   }
 }

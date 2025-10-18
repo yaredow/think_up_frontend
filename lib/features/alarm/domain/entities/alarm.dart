@@ -1,3 +1,7 @@
+enum PuzzleCategory { math, sequence, tile }
+
+enum PuzzleDifficulty { easy, medium, hard }
+
 class Alarm {
   final int id;
   final String title;
@@ -6,6 +10,8 @@ class Alarm {
   final List<String> days;
   final String sound;
   final bool isRepeating;
+  final PuzzleCategory puzzleCategory;
+  final PuzzleDifficulty puzzleDifficulty;
 
   const Alarm({
     required this.id,
@@ -15,6 +21,8 @@ class Alarm {
     required this.sound,
     required this.isRepeating,
     this.isActive = true,
+    this.puzzleCategory = PuzzleCategory.math,
+    this.puzzleDifficulty = PuzzleDifficulty.easy,
   });
 
   Alarm copyWith({
@@ -25,6 +33,8 @@ class Alarm {
     List<String>? days,
     String? sound,
     bool? isRepeating,
+    PuzzleCategory? puzzleCategory,
+    PuzzleDifficulty? puzzleDifficulty,
   }) {
     return Alarm(
       id: id ?? this.id,
@@ -34,6 +44,8 @@ class Alarm {
       days: days ?? this.days,
       sound: sound ?? this.sound,
       isRepeating: isRepeating ?? this.isRepeating,
+      puzzleCategory: puzzleCategory ?? this.puzzleCategory,
+      puzzleDifficulty: puzzleDifficulty ?? this.puzzleDifficulty,
     );
   }
 
@@ -44,20 +56,37 @@ class Alarm {
     'sound': sound,
     'isRepeating': isRepeating,
     'days': days,
+    'puzzleType': puzzleCategory.name,
+    'puzzleDifficulty': puzzleDifficulty.name,
   };
 
-  // Creates the object from a Map
-  factory Alarm.fromJson(Map<String, dynamic> json) => Alarm(
-    id: json['id'] is int
-        ? json['id'] as int
-        : int.parse(json['id'].toString()),
-    time: DateTime.parse(json['time'] as String),
-    title: json['title'] as String,
-    sound: json['sound'] as String,
-    isRepeating: json['isRepeating'] as bool,
-    days: List<String>.from(json['days'] as List),
-  );
+  factory Alarm.fromJson(Map<String, dynamic> json) {
+    final puzzleTypeStr = (json['puzzleType'] as String?) ?? 'math';
+    final puzzleDifficultyStr = (json['puzzleDifficulty'] as String?) ?? 'easy';
 
-  // Validation method used by the Save Button logic
+    final puzzleCategory = PuzzleCategory.values.firstWhere(
+      (e) => e.name == puzzleTypeStr,
+      orElse: () => PuzzleCategory.math,
+    );
+
+    final puzzleDifficulty = PuzzleDifficulty.values.firstWhere(
+      (e) => e.name == puzzleDifficultyStr,
+      orElse: () => PuzzleDifficulty.easy,
+    );
+
+    return Alarm(
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.parse(json['id'].toString()),
+      time: DateTime.parse(json['time'] as String),
+      title: json['title'] as String,
+      sound: json['sound'] as String,
+      isRepeating: json['isRepeating'] as bool,
+      days: List<String>.from(json['days'] as List),
+      puzzleCategory: puzzleCategory,
+      puzzleDifficulty: puzzleDifficulty,
+    );
+  }
+
   bool isValid() => days.isNotEmpty;
 }

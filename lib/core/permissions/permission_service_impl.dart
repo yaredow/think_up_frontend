@@ -17,12 +17,16 @@ class PermissionServiceImpl implements PermissionService {
     return status.isGranted;
   }
 
-  // Temporary simple implementation: assume scheduling exact alarms is allowed.
-  // We'll add native handling later when ready.
   @override
   Future<bool> canScheduleExactAlarm() async {
-    // If you want, you can return false on Android 12+ and handle later.
-    return true;
+    final status = await ph.Permission.scheduleExactAlarm.request();
+
+    if (status.isPermanentlyDenied) {
+      await ph.openAppSettings();
+      return false;
+    }
+
+    return status.isGranted;
   }
 
   @override
