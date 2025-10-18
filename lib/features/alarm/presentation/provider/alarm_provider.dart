@@ -78,8 +78,6 @@ class AlarmProvider extends ChangeNotifier {
         time.minute,
       );
 
-      // If the scheduled time is BEFORE the next minute (normalizedNow),
-      // schedule for tomorrow.
       if (scheduledDate.isBefore(normalizedNow)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
